@@ -1,0 +1,12 @@
+{
+	"name": "ren.js",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"server": "node ./bin/www"
+	},
+	"dependencies": {
+		"redis": "^2.8.0",
+		"xml2js": "^0.4.19"
+	}
+}

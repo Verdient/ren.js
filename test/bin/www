@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const application = require('../../src/base/application');
+
+if(fs.existsSync('config/main-local.js')){
+	const objectHelper = require('../../src/helpers/object');
+	config = objectHelper.merge(require('../config/main'), require('../config/main-local'));
+}else{
+	config = require('../config/main');
+}
+
+new application(config);
