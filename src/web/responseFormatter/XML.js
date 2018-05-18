@@ -1,8 +1,7 @@
 'use strict';
 
-const xml2js = require('xml2js');
+const xmlbuilder = require('xmlbuilder');
 
 module.exports = (body) => {
-	let builder = new xml2js.Builder();
-	return builder.buildObject(body);
+	return xmlbuilder.create(body).end();
 }
