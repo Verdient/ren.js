@@ -6,7 +6,18 @@
 		"server": "node ./bin/www"
 	},
 	"dependencies": {
+		"module-alias": "^2.0.6",
 		"redis": "^2.8.0",
 		"xmlbuilder": "^10.0.0"
-	}
+	},
+	"_moduleAliases": {
+		"@components": "test/components",
+		"@models": "test/models",
+		"@scripts": "test/scripts",
+		"@filters": "test/filters",
+		"@console": "test/console"
+	},
+	"_moduleDirectories": [
+		"src"
+	]
 }

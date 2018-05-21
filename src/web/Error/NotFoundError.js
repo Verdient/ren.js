@@ -1,12 +1,11 @@
 'use strict'
 
-const UserError = require('../../base/UserError');
+const HttpError = require('./HttpError');
 
-class NotFoundError extends UserError
+class NotFoundError extends HttpError
 {
 	constructor(message, code, data){
-		super(message || 'Not Found', code, data);
-		this.status = 404;
+		super(message || 'Not Found', 404, code, data);
 		this.type = 'Not Found Error'
 	}
 }

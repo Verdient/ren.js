@@ -11,7 +11,7 @@ module.exports = (ctx, options) => {
 		}else{
 			ctx.response.status = 200;
 			ctx.response.body = {
-				code: error.code || error.status,
+				code: error.code || error.status || 500,
 				message: error.message
 			};
 		}

@@ -3,7 +3,9 @@
 const Url = require('url');
 
 class Request {
-	constructor(request, parser){
+	constructor(request, config){
+		this.defaultRouter = config.router.defaultRouter;
+		this.defaultAction = config.router.defaultAction;
 		this.request = request;
 		this.headers = request.headers;
 		let url = Url.parse(request.url);
@@ -41,14 +43,9 @@ class Request {
 		return this.headers['accept'] || 'application/json';
 	}
 
-	get router(){
-		let path = this.path.split('/');
-		return path[1] || '/';
-	}
-
-	get action(){
-		let path = this.path.split('/');
-		return path[2] || '/';
+	getHeader(name){
+		name = name.toLowerCase();
+		return this.headers[name];
 	}
 }
 

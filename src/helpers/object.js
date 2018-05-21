@@ -1,15 +1,16 @@
 'use strict';
 
 const class2type = {
-	'[object Array]': "array",
-	'[object Boolean]': "boolean",
-	'[object Date]': "date",
-	'[object Error]': "error",
-	'[object Function]': "function",
-	'[object Number]': "number",
-	'[object Object]': "object",
-	'[object RegExp]': "regexp",
-	'[object String]': "string",
+	'[object Array]': 'array',
+	'[object Boolean]': 'boolean',
+	'[object Date]': 'date',
+	'[object Error]': 'error',
+	'[object Function]': 'function',
+	'[object Number]': 'number',
+	'[object Object]': 'object',
+	'[object RegExp]': 'regexp',
+	'[object String]': 'string',
+	'[object AsyncFunction]': 'asyncFunction'
 }
 
 const core_toString = class2type.toString;
@@ -138,10 +139,29 @@ var inArray = (needle, haystack) => {
 	return false;
 }
 
+/**
+ * ksort(Object data)
+ * 根据键名排序
+ * ------------------
+ * @param {Object} data 待排序的数据
+ * --------------------------------
+ * @return {Object}
+ * @author Verdient。
+ */
+var ksort = (data, compareFunction) => {
+	var keys = Object.keys(data).sort(compareFunction);　　
+	var result = {};
+	for(var i in keys) {
+		result[keys[i]] = data[keys[i]];
+	}
+	return result;
+}
+
 module.exports = {
 	type: type,
 	isPlainObject: isPlainObject,
 	isEmptyObject: isEmptyObject,
 	merge: merge,
-	inArray: inArray
+	inArray: inArray,
+	ksort: ksort
 }

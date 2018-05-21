@@ -6,8 +6,9 @@ const path = require('path');
 const Request = require('../web/Request');
 const Response = require('../web/Response');
 const registerRouter = require('../web/router/register');
-const routerAction = require('../web/router/action');
-const errorHandler = require('../base/errorHandler');
+const Router = require('../web/router');
+const runFilters = require('../web/filters/run');
+const errorHandler = require('../web/errorHandler');
 const Logger = require('../log/Logger');
 const logger = new Logger();
 
@@ -41,11 +42,14 @@ class Application {
 			let registerComponents = require('../components/register');
 			registerComponents(this.config.components);
 		}
-
+		if(typeof this.config.filters == 'object'){
+			let registerFilters = require('../web/filters/register');
+			registerFilters(this.config.filters);
+		}
 		let realPath = fs.realpathSync('routers');
 		let routers = fs.readdirSync('routers');
 		routers.forEach((value, index) => {
-			routers[index] = path.join(realPath, value)
+			routers[index] = path.join(realPath, value);
 		});
 		registerRouter(routers);
 	}
@@ -67,10 +71,14 @@ class Application {
 
 	async handleRequest(request, response){
 		let ctx = {};
-		ctx.request = new Request(request);
+		ctx.request = new Request(request, this.config);
 		ctx.response = new Response(response, ctx.request);
 		ctx.components = this.components;
-		await routerAction(ctx, this.config.router);
+		ctx.router = new Router(ctx, this.config.router);
+		var result = await runFilters(ctx);
+		if(result === true){
+			await ctx.router.runAction(ctx);
+		}
 		errorHandler(ctx, this.config.response);
 		this.handleResponse(ctx.response, this.config.response);
 	}
@@ -82,11 +90,11 @@ class Application {
 			res.setHeader(i, response.headers[i]);
 		}
 		let body = response.body;
-		if(!options.RESTful && !body.code){
-			body = Object.assign({code: response.status}, body);
-		}
 		if(body !== null){
 			let contentType = response.getHeader('Content-Type');
+			if(!options.RESTful && !body.code){
+				body = Object.assign({code: response.status}, body);
+			}
 			if(options.formaterMap[contentType]){
 				let formatter = require(options.formaterMap[contentType]);
 				body = formatter(body);

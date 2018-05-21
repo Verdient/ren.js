@@ -1,12 +1,17 @@
 'use strict'
 
-const Router = require('../../src/web/router');
+const Router = require('web/router');
 
 class Site extends Router {
 
 	actionIndex(){
-		this.ctx.response.body = {message: 'Hello World'}
-		this.resolve();
+		let ctx = this.ctx;
+		let next = this.next;
+		next(new Error('sae'));
+		setTimeout(() => {
+			ctx.response.body = {message: 'Hello World'}
+			next();
+		}, 500);
 	}
 }
 
