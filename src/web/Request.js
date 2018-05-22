@@ -1,9 +1,13 @@
 'use strict'
 
 const Url = require('url');
+const BaseClass = require('base/BaseClass');
+const objectHelper = require('helpers/object');
 
-class Request {
+class Request extends BaseClass {
+
 	constructor(request, config){
+		super();
 		this.defaultRouter = config.router.defaultRouter;
 		this.defaultAction = config.router.defaultAction;
 		this.request = request;
@@ -24,6 +28,7 @@ class Request {
 		if(!this.path){
 			this.path = '/';
 		}
+		this._acceptObject = null;
 		// this.body = request.body;
 	}
 
@@ -41,6 +46,36 @@ class Request {
 
 	get accept(){
 		return this.headers['accept'] || 'application/json';
+	}
+
+	get acceptObject(){
+		if(!this._acceptObject){
+			let accept = this.headers['accept'];
+			let acceptObject = {};
+			accept = accept.split(',');
+			accept.forEach((value, index) => {
+				accept[index] = value.split(';');
+				if(accept[index].length == 2){
+					accept[index][1] = accept[index][1].split('=')[1];
+				}else{
+					accept[index][1] = 1;
+				}
+				if(!acceptObject[accept[index][1]]){
+					acceptObject[accept[index][1]] = new Set();
+				}
+				acceptObject[accept[index][1]].add(accept[index][0]);
+			});
+			this._acceptObject = objectHelper.ksort(acceptObject, (x, y) => {
+				if(Number(x) > Number(y)){
+					return -1;
+				}else if(Number(x) == Number(y)){
+					return 0
+				}else{
+					return 1;
+				}
+			});
+		}
+		return this._acceptObject;
 	}
 
 	getHeader(name){

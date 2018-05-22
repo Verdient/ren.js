@@ -2,59 +2,22 @@
 
 const redis = require('redis');
 
-module.exports = () => {
-	var redisCompoent = {
+const Component = require('base/Component');
 
-		/**
-		 * @var host
-		 * 主机
-		 * ---------
-		 * @author Verdient。
-		 */
-		host: 'localhost',
-
-		/**
-		 * @var port
-		 * 端口
-		 * ---------
-		 * @author Verdient。
-		 */
-		port: 6379,
-
-		/**
-		 * @var password
-		 * 密码
-		 * --------------
-		 * @author Verdient。
-		 */
-		password: '',
-
-		/**
-		 * @var db
-		 * 数据库
-		 * -------
-		 * @author Verdient。
-		 */
-		db: 0,
-
-		/**
-		 * init()
-		 * 初始化
-		 * ------
-		 * @return {Object}
-		 * @author Verdient。
-		 */
-		init: () => {
-			var redisClient = redis.createClient({
-				host: redisCompoent.host,
-				port: redisCompoent.port,
-				password: redisCompoent.password,
-				db: redisCompoent.db
-			});
-			redisClient.enabled = redisCompoent.enabled;
-			return redisClient;
-		}
+class Redis extends Component {
+	constructor(options){
+		super();
+		this.host = options.host || 'localhost';
+		this.port = options.port || 6379;
+		this.password = options.password || '';
+		this.db = options.db || 0;
+		this.client = redis.createClient({
+			host: this.host,
+			port: this.port,
+			password: this.password,
+			db: this.db
+		});
 	}
+}
 
-	return redisCompoent;
-};
+module.exports = Redis;

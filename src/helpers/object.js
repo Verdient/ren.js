@@ -103,7 +103,7 @@ var merge = function(){
 				if(target === copy){
 					continue;
 				}
-				if(copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))){
+				if(copy && (isPlainObject(copy) || (copyIsArray = Array.isArray(copy)))){
 					if (copyIsArray){
 						copyIsArray = false;
 						clone = src && isArray(src) ? src : [];
@@ -150,10 +150,10 @@ var inArray = (needle, haystack) => {
  */
 var ksort = (data, compareFunction) => {
 	var keys = Object.keys(data).sort(compareFunction);　　
-	var result = {};
-	for(var i in keys) {
-		result[keys[i]] = data[keys[i]];
-	}
+	let result = {};
+	keys.forEach((key) => {
+		result[key] = data[key];
+	});
 	return result;
 }
 

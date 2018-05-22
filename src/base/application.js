@@ -1,15 +1,15 @@
 'use strict';
 
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const Request = require('../web/Request');
-const Response = require('../web/Response');
-const registerRouter = require('../web/router/register');
-const Router = require('../web/router');
-const runFilters = require('../web/filters/run');
-const errorHandler = require('../web/errorHandler');
-const Logger = require('../log/Logger');
+const Components = require('../base/Components');
+const Request = require('web/Request');
+const Response = require('web/Response');
+const Filters = require('web/Filters');
+const Routers = require('web/Routers');
+const Router = require('web/Router');
+const errorHandler = require('web/errorHandler');
+const Logger = require('log/Logger');
+const objectHelper = require('helpers/object');
 const logger = new Logger();
 
 const defaultConfig = {
@@ -32,26 +32,15 @@ const defaultConfig = {
 
 class Application {
 	constructor(config){
-		this.config = Object.assign(defaultConfig, config);
+		this.config = objectHelper.merge(defaultConfig, config);
 		this.validateConfig(this.config);
 		this.listen({
 			host: this.config.host,
 			port: this.config.port
 		});
-		if(typeof this.config.components == 'object'){
-			let registerComponents = require('../components/register');
-			registerComponents(this.config.components);
-		}
-		if(typeof this.config.filters == 'object'){
-			let registerFilters = require('../web/filters/register');
-			registerFilters(this.config.filters);
-		}
-		let realPath = fs.realpathSync('routers');
-		let routers = fs.readdirSync('routers');
-		routers.forEach((value, index) => {
-			routers[index] = path.join(realPath, value);
-		});
-		registerRouter(routers);
+		this.components = new Components(this.config.components);
+		this.filters = new Filters(this.config.filters);
+		this.routers = new Routers(this.config.router);
 	}
 
 	validateConfig(config){
@@ -72,20 +61,20 @@ class Application {
 	async handleRequest(request, response){
 		let ctx = {};
 		ctx.request = new Request(request, this.config);
-		ctx.response = new Response(response, ctx.request);
+		ctx.response = new Response(response, ctx.request, this.config.response);
 		ctx.components = this.components;
-		ctx.router = new Router(ctx, this.config.router);
-		var result = await runFilters(ctx);
+		ctx.routers = this.routers;
+		var result = await this.filters.run(ctx);
 		if(result === true){
-			await ctx.router.runAction(ctx);
+			await this.routers.run(ctx);
 		}
-		errorHandler(ctx, this.config.response);
+		errorHandler(ctx);
 		this.handleResponse(ctx.response, this.config.response);
 	}
 
 	handleResponse(response, options){
 		const res = response.response;
-		res.statusCode = response.status;
+		res.statusCode = options.RESTful ? response.status : 200;
 		for(var i in response.headers){
 			res.setHeader(i, response.headers[i]);
 		}
@@ -95,8 +84,8 @@ class Application {
 			if(!options.RESTful && !body.code){
 				body = Object.assign({code: response.status}, body);
 			}
-			if(options.formaterMap[contentType]){
-				let formatter = require(options.formaterMap[contentType]);
+			if(response.formaterMap[contentType]){
+				let formatter = require(response.formaterMap[contentType]);
 				body = formatter(body);
 			}else{
 				res.statusCode = 406;

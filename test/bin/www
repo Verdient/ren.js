@@ -2,7 +2,7 @@
 
 require('module-alias/register');
 const fs = require('fs');
-const application = require('../../src/base/application');
+const Application = require('../../src/base/Application');
 
 if(fs.existsSync('config/main-local.js')){
 	const objectHelper = require('../../src/helpers/object');
@@ -11,4 +11,4 @@ if(fs.existsSync('config/main-local.js')){
 	config = require('../config/main');
 }
 
-new application(config);
+new Application(config);

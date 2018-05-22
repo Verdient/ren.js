@@ -1,15 +1,21 @@
 'use strict'
 
-class Response {
-	constructor(response, request){
+const BaseClass = require('base/BaseClass');
+
+class Response extends BaseClass {
+
+	constructor(response, request, options){
+		super();
+		this.request = request;
 		this.response = response;
+		this.formaterMap = options.formaterMap;
 		this._status = 200;
 		this._body = null;
 		this._headers = {
 			'Content-Type': 'application/json'
 		};
 		if(request.accept){
-			this._headers['Content-Type'] = request.accept;
+			this._headers['Content-Type'] = this.getContentType();
 		}
 	}
 
@@ -57,6 +63,19 @@ class Response {
 		headers.forEach(header => {
 			delete this._headers[header];
 		});
+	}
+
+	getContentType(){
+		let request = this.request;
+		let acceptObject = request.acceptObject;
+		for(var i in acceptObject){
+			for(var m of acceptObject[i]){
+				if(typeof this.formaterMap[m] != 'undefined'){
+					return m;
+				}
+			}
+		}
+		return false
 	}
 }
 
