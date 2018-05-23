@@ -7,7 +7,7 @@ class Site extends Router {
 	actionIndex(){
 		let ctx = this.ctx;
 		let next = this.next;
-		ctx.response.body = {message: 'Hello World'}
+		ctx.response.body = new Map()
 		next();
 	}
 }

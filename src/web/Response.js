@@ -1,6 +1,7 @@
 'use strict'
 
 const BaseClass = require('base/BaseClass');
+const objectHeler = require('helpers/object');
 
 class Response extends BaseClass {
 
@@ -39,11 +40,23 @@ class Response extends BaseClass {
 		return this._body;
 	}
 
-	set body(value) {
-		this._body = value;
+	set body(value){
 		if(null == value){
 			this.removeHeader('Content-Type', 'Content-Length', 'Transfer-Encoding');
-			return;
+		}else{
+			let type = objectHeler.type(value);
+			switch(type){
+				case 'string': case 'number':
+					this._body = {message: value};
+					break;
+				case 'object':
+					this._body = {data: value};
+					break;
+				default:
+					this.status = 500;
+					this.body = 'Response body must be the following type: Object, String, Array, ' + type.substr(0, 1).toUpperCase() + type.substr(1) + ' is unsupported';
+					break;
+			}
 		}
 	}
 
@@ -67,12 +80,10 @@ class Response extends BaseClass {
 
 	getContentType(){
 		let request = this.request;
-		let acceptObject = request.acceptObject;
-		for(var i in acceptObject){
-			for(var m of acceptObject[i]){
-				if(typeof this.formaterMap[m] != 'undefined'){
-					return m;
-				}
+		let acceptSeries = request.acceptSeries;
+		for(let i of acceptSeries){
+			if(typeof this.formaterMap[i] != 'undefined'){
+				return i;
 			}
 		}
 		return false

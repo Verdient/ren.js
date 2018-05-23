@@ -28,7 +28,7 @@ class Request extends BaseClass {
 		if(!this.path){
 			this.path = '/';
 		}
-		this._acceptObject = null;
+		this._acceptSeries = null;
 		// this.body = request.body;
 	}
 
@@ -48,8 +48,9 @@ class Request extends BaseClass {
 		return this.headers['accept'] || 'application/json';
 	}
 
-	get acceptObject(){
-		if(!this._acceptObject){
+	get acceptSeries(){
+		if(!this._acceptSeries){
+			this._acceptSeries = [];
 			let accept = this.headers['accept'];
 			let acceptObject = {};
 			accept = accept.split(',');
@@ -65,7 +66,7 @@ class Request extends BaseClass {
 				}
 				acceptObject[accept[index][1]].add(accept[index][0]);
 			});
-			this._acceptObject = objectHelper.ksort(acceptObject, (x, y) => {
+			let keys = Object.keys(acceptObject).sort((x, y) => {
 				if(Number(x) > Number(y)){
 					return -1;
 				}else if(Number(x) == Number(y)){
@@ -74,8 +75,13 @@ class Request extends BaseClass {
 					return 1;
 				}
 			});
+			keys.forEach(key => {
+				for(let accept of acceptObject[key]){
+					this._acceptSeries.push(accept);
+				}
+			});
 		}
-		return this._acceptObject;
+		return this._acceptSeries;
 	}
 
 	getHeader(name){

@@ -10,7 +10,9 @@ const class2type = {
 	'[object Object]': 'object',
 	'[object RegExp]': 'regexp',
 	'[object String]': 'string',
-	'[object AsyncFunction]': 'asyncFunction'
+	'[object AsyncFunction]': 'asyncFunction',
+	'[object Set]': 'set',
+	'[object Map]': 'map'
 }
 
 const core_toString = class2type.toString;
@@ -26,11 +28,11 @@ const core_hasOwn = class2type.hasOwnProperty;
  * @mirror jQuery
  * @author Verdient。
  */
-var type = function(obj){
-	if(obj == null){
-		return String( obj );
+var type = function(data){
+	if(data == null){
+		return String(data);
 	}
-	return typeof obj === "object" || typeof obj === "function" ? class2type[core_toString.call(obj)] || "object" : typeof obj;
+	return typeof data === "object" || typeof data === "function" ? class2type[core_toString.call(data)] || "object" : typeof data;
 }
 
 /**
