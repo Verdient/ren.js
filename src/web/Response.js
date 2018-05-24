@@ -10,6 +10,7 @@ class Response extends BaseClass {
 		this.request = request;
 		this.response = response;
 		this.formaterMap = options.formaterMap;
+		this.defaultContentType = options.defaultContentType || false;
 		this._status = 200;
 		this._body = null;
 		this._headers = {
@@ -86,7 +87,7 @@ class Response extends BaseClass {
 				return i;
 			}
 		}
-		return false
+		return this.defaultContentType;
 	}
 }
 

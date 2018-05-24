@@ -6,6 +6,14 @@ module.exports = {
 	response: {
 		RESTful: false
 	},
+	logger: {
+		level: 3,
+		targets: {
+			system: {
+				levels: []
+			}
+		}
+	},
 	components: {
 		redis: {
 			module: 'components/Redis',

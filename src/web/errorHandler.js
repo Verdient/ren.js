@@ -6,6 +6,6 @@ module.exports = (ctx) => {
 	let error = ctx.error;
 	if(error){
 		ctx.response.status = error.status || 500;
-		ctx.response.body = {message: error.message};
+		ctx.response.body = error.message;
 	}
 }

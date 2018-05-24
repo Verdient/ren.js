@@ -8,9 +8,7 @@ const Filters = require('web/Filters');
 const Routers = require('web/Routers');
 const Router = require('web/Router');
 const errorHandler = require('web/errorHandler');
-const Logger = require('log/Logger');
 const objectHelper = require('helpers/object');
-const logger = new Logger();
 
 const defaultConfig = {
 	host: 'localhost',
@@ -20,6 +18,7 @@ const defaultConfig = {
 			'application/json': '../web/responseFormatter/JSON',
 			'application/xml': '../web/responseFormatter/XML'
 		},
+		defaultContentType: 'application/json',
 		RESTful: false
 	},
 	router: {
@@ -27,6 +26,15 @@ const defaultConfig = {
 		defaultAction: 'index',
 		routerSeparator: '-',
 		actionSeparator: '-'
+	},
+	logger: {
+		module: 'log/Logger',
+		targets: {
+			default: {
+				module: 'log/target/ConsoleTarget',
+				levels: '*'
+			}
+		}
 	}
 }
 
@@ -39,6 +47,8 @@ class Application {
 			port: this.config.port
 		});
 		this.components = new Components(this.config.components);
+		let Logger = require(this.config.logger.module);
+		this.logger = new Logger(this.config.logger);
 		this.filters = new Filters(this.config.filters);
 		this.routers = new Routers(this.config.router);
 	}
@@ -54,7 +64,7 @@ class Application {
 			this.handleRequest(request, response);
 		});
 		return server.listen(options, () => {
-			logger.info('Application listen on ' + options.host + ':' + options.port + ' succeed');
+			this.logger.info('Application listen on ' + options.host + ':' + options.port + ' succeed');
 		});
 	}
 
