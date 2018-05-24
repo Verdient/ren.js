@@ -25,6 +25,7 @@ class Routers extends BaseClass {
 		});
 		files.forEach((file) => {
 			var routerName = path.basename(file, '.js');
+			routerName = routerName.substring(0,1).toLowerCase() + routerName.substring(1)
 			this.routers[routerName] = require(file);
 		});
 	}
@@ -58,9 +59,14 @@ class Routers extends BaseClass {
 		let path = request.path.split('/');
 		let requestRouter = [];
 		if(path[1]){
+			path[1] = path[1].toLowerCase();
 			requestRouter = path[1].split(this.routerSeparator);
 			requestRouter.forEach((value, index) => {
-				requestRouter[index] = value.substring(0,1).toUpperCase() + value.substring(1);
+				if(index){
+					requestRouter[index] = value.substring(0,1).toUpperCase() + value.substring(1);
+				}else{
+					requestRouter[index] = value;
+				}
 			});
 		}
 		return requestRouter.join('') || this.defaultRouter;
@@ -71,9 +77,14 @@ class Routers extends BaseClass {
 		let path = request.path.split('/');
 		let requestAction = [];
 		if(path[2]){
-			requestAction = path[1].split(this.actionSeparator);
+			path[2] = path[2].toLowerCase();
+			requestAction = path[2].split(this.actionSeparator);
 			requestAction.forEach((value, index) => {
-				requestAction[index] = value.substring(0,1).toUpperCase() + value.substring(1);
+				if(index){
+					requestAction[index] = value.substring(0,1).toUpperCase() + value.substring(1);
+				}else{
+					requestAction[index] = value;
+				}
 			});
 		}
 		return requestAction.join('') || this.defaultAction;

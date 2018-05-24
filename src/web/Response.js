@@ -82,12 +82,19 @@ class Response extends BaseClass {
 	getContentType(){
 		let request = this.request;
 		let acceptSeries = request.acceptSeries;
-		for(let i of acceptSeries){
-			if(typeof this.formaterMap[i] != 'undefined'){
-				return i;
+		if(acceptSeries.length > 0){
+			for(let i of acceptSeries){
+				if(typeof this.formaterMap[i] != 'undefined'){
+					return i;
+				}
+				if(i == '*/*'){
+					return this.defaultContentType;
+				}
 			}
+			return false;
+		}else{
+			return this.defaultContentType;
 		}
-		return this.defaultContentType;
 	}
 }
 
