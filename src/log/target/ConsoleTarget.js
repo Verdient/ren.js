@@ -15,6 +15,8 @@ class ConsoleTarget extends LoggerTarget {
 	log(level, data){
 		if(this.levelEnabled(level)){
 			let logger = this.levelMap.get(level);
+			let date = new Date();
+			process.stdout.write(date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + ' [' + level + '] ');
 			logger(data);
 		}
 	}

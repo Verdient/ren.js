@@ -108,7 +108,7 @@ var merge = function(){
 				if(copy && (isPlainObject(copy) || (copyIsArray = Array.isArray(copy)))){
 					if (copyIsArray){
 						copyIsArray = false;
-						clone = src && isArray(src) ? src : [];
+						clone = src && Array.isArray(src) ? src : [];
 					}else{
 						clone = src && isPlainObject(src) ? src : {};
 					}
