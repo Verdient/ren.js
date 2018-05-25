@@ -13,8 +13,13 @@ const objectHelper = require('helpers/object');
 const defaultConfig = {
 	host: 'localhost',
 	port: 80,
+	request: {
+		parser: {
+			'application/json': '../web/requestParser/JSON',
+		}
+	},
 	response: {
-		formaterMap: {
+		formatter: {
 			'application/json': '../web/responseFormatter/JSON',
 			'application/xml': '../web/responseFormatter/XML'
 		},
@@ -61,7 +66,14 @@ class Application {
 
 	listen(options){
 		const server = http.createServer((request, response) => {
-			this.handleRequest(request, response);
+			let body = [];
+			request.on('data', (buffer) => {
+				body.push(buffer);
+			});
+			request.on('end', () => {
+				request.body = Buffer.concat(body).toString();
+				this.handleRequest(request, response);
+			});
 		});
 		return server.listen(options, () => {
 			this.logger.info('Application listen on ' + options.host + ':' + options.port + ' succeed');
@@ -70,13 +82,14 @@ class Application {
 
 	async handleRequest(request, response){
 		let ctx = {};
-		ctx.request = new Request(request, this.config);
+		ctx.request = new Request(request, this.config.request);
 		ctx.response = new Response(response, ctx.request, this.config.response);
 		ctx.components = this.components;
 		ctx.routers = this.routers;
-		var result = await this.filters.run(ctx);
-		if(result === true){
-			await this.routers.run(ctx);
+		if(ctx.request.error){
+			ctx.error = ctx.request.error;
+		}else{
+			await this.filters.run(ctx) && await this.routers.run(ctx);
 		}
 		errorHandler(ctx);
 		this.handleResponse(ctx.response, this.config.response);
@@ -94,8 +107,8 @@ class Application {
 			if(!options.RESTful && !body.code){
 				body = Object.assign({code: response.status}, body);
 			}
-			if(response.formaterMap[contentType]){
-				let formatter = require(response.formaterMap[contentType]);
+			if(response.formatter[contentType]){
+				let formatter = require(response.formatter[contentType]);
 				body = formatter(body);
 			}else{
 				res.statusCode = 406;

@@ -1,15 +1,15 @@
 'use strict'
 
 const Url = require('url');
-const BaseClass = require('base/BaseClass');
-const objectHelper = require('helpers/object');
+const BaseClass = require('../base/BaseClass');
+const BadRequestError = require('../web/error/BadRequest');
+const objectHelper = require('../helpers/object');
 
 class Request extends BaseClass {
 
-	constructor(request, config){
+	constructor(request, options){
 		super();
-		this.defaultRouter = config.router.defaultRouter;
-		this.defaultAction = config.router.defaultAction;
+		this.parser = options.parser;
 		this.request = request;
 		this.headers = request.headers;
 		let url = Url.parse(request.url);
@@ -29,7 +29,17 @@ class Request extends BaseClass {
 			this.path = '/';
 		}
 		this._acceptSeries = null;
-		// this.body = request.body;
+		let contentType = this.getHeader('Content-Type');
+		if(this.parser[contentType]){
+			let parser = require(this.parser[this.getHeader('Content-Type')]);
+			try{
+				this._body = parser(this.request.body);
+			}catch(e){
+				this.error = new BadRequestError(e.message);
+			}
+		}else{
+			this.error = new BadRequestError('Unsupported Content-type: ' + contentType);
+		}
 	}
 
 	get origin(){
@@ -82,6 +92,10 @@ class Request extends BaseClass {
 			});
 		}
 		return this._acceptSeries;
+	}
+
+	get body(){
+		return this._body;
 	}
 
 	getHeader(name){

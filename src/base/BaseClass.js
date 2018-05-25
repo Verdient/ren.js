@@ -1,7 +1,7 @@
 'use strict'
 
-class baseClass {
+class BaseClass {
 
 }
 
-module.exports = baseClass;
+module.exports = BaseClass;

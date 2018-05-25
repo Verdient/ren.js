@@ -39,13 +39,15 @@ class Routers extends BaseClass {
 			let Router = new routers[router](ctx);
 			if(typeof Router[actionName] == 'function'){
 				return new Promise((resolve, revoke) => {
-					Router.next = (error) => {
-						if(error){
-							ctx.error = error;
-							resolve(error);
-						}else{
-							resolve();
+					Router.next = (result) => {
+						if(result){
+							if(result instanceof Error){
+								ctx.error = result;
+								return resolve(false);
+							}
+							ctx.response.body = result;
 						}
+						resolve(true);
 					}
 					Router[actionName]();
 				});

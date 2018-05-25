@@ -9,7 +9,7 @@ class Response extends BaseClass {
 		super();
 		this.request = request;
 		this.response = response;
-		this.formaterMap = options.formaterMap;
+		this.formatter = options.formatter;
 		this.defaultContentType = options.defaultContentType || false;
 		this._status = 200;
 		this._body = null;
@@ -84,7 +84,7 @@ class Response extends BaseClass {
 		let acceptSeries = request.acceptSeries;
 		if(acceptSeries.length > 0){
 			for(let i of acceptSeries){
-				if(typeof this.formaterMap[i] != 'undefined'){
+				if(typeof this.formatter[i] != 'undefined'){
 					return i;
 				}
 				if(i == '*/*'){

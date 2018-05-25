@@ -7,6 +7,8 @@ class Router extends BaseClass {
 	constructor(ctx){
 		super();
 		this.ctx = ctx;
+		this.request = ctx.request;
+		this.response = ctx.response;
 		this.next = () => {}
 	}
 }
