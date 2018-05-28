@@ -2,7 +2,7 @@
 
 const Url = require('url');
 const BaseClass = require('../base/BaseClass');
-const BadRequestError = require('../web/error/BadRequest');
+const BadRequestError = require('../web/error/BadRequestError');
 const objectHelper = require('../helpers/object');
 
 class Request extends BaseClass {

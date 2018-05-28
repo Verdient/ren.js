@@ -2,8 +2,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const BaseClass = require('base/BaseClass');
-const NotFoundError = require('web/error/NotFoundError');
+const BaseClass = require('../base/BaseClass');
+const Errors = require('../base/Errors');
+const NotFoundError = require('../web/error/NotFoundError');
 
 class Routers extends BaseClass {
 
@@ -30,7 +31,7 @@ class Routers extends BaseClass {
 		});
 	}
 
-	run(ctx){
+	async run(ctx){
 		let routers = this.routers;
 		let router = this.getRequestRouter(ctx);
 		let action = this.getRequestAction(ctx);
@@ -45,7 +46,11 @@ class Routers extends BaseClass {
 								ctx.error = result;
 								return resolve(false);
 							}
-							ctx.response.body = result;
+							if(result instanceof Errors){
+								ctx.error = result;
+								return resolve(false);
+							}
+							ctx.response.body = {data: result};
 						}
 						resolve(true);
 					}

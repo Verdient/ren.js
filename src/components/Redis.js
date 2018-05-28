@@ -2,7 +2,7 @@
 
 const redis = require('redis');
 
-const Component = require('base/Component');
+const Component = require('../base/Component');
 
 class Redis extends Component {
 	constructor(options){

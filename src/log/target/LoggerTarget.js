@@ -1,3 +1,5 @@
+'use strict'
+
 const BaseClass = require('base/BaseClass');
 const objectHelper = require('helpers/object');
 

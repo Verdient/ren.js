@@ -1,3 +1,5 @@
+'use strict'
+
 const LoggerTarget = require('./LoggerTarget');
 
 class ConsoleTarget extends LoggerTarget {

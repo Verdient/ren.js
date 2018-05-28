@@ -1,11 +1,12 @@
 'use strict'
 
-class HttpError extends Error
+const UserError = require('../../base/UserError');
+
+class HttpError extends UserError
 {
 	constructor(message, status, code, data){
-		super(message, data);
+		super(message, code, data);
 		this.status = status;
-		this.code = code;
 		this.type = 'Http Error'
 	}
 }

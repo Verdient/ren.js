@@ -2,12 +2,12 @@
 
 const http = require('http');
 const Components = require('../base/Components');
+const Validators = require('base/Validators');
 const Request = require('web/Request');
 const Response = require('web/Response');
 const Filters = require('web/Filters');
 const Routers = require('web/Routers');
 const Router = require('web/Router');
-const errorHandler = require('web/errorHandler');
 const objectHelper = require('helpers/object');
 
 const defaultConfig = {
@@ -26,6 +26,10 @@ const defaultConfig = {
 		defaultContentType: 'application/json',
 		RESTful: false
 	},
+	errorHandler: {
+		module: '../web/ErrorHandler',
+		multiErrors: false
+	},
 	router: {
 		defaultRouter: 'site',
 		defaultAction: 'index',
@@ -33,13 +37,27 @@ const defaultConfig = {
 		actionSeparator: '-'
 	},
 	logger: {
-		module: 'log/Logger',
+		module: '../log/Logger',
 		targets: {
 			default: {
-				module: 'log/target/ConsoleTarget',
+				module: '../log/target/ConsoleTarget',
 				levels: '*'
 			}
 		}
+	},
+	i18n: {
+		module: '../i18n/Translation',
+	},
+	validators: {
+		'required': '../validator/RequiredValidator',
+		'number': '../validator/NumberValidator',
+		'integer': '../validator/IntegerValidator',
+		'string': '../validator/StringValidator',
+		'in': '../validator/InValidator',
+		'uuid': '../validator/UUIDValidator',
+		'mobile': '../validator/MobileValidator',
+		'email': '../validator/EmailValidator',
+		'version': '../validator/VersionValidator'
 	}
 }
 
@@ -51,11 +69,17 @@ class Application {
 			host: this.config.host,
 			port: this.config.port
 		});
-		this.components = new Components(this.config.components);
 		let Logger = require(this.config.logger.module);
+		let ErrorHandler = require(this.config.errorHandler.module);
+		let Translation = require(this.config.i18n.module);
+		this.translation = new Translation(this.config.i18n);
+		this.config.errorHandler.translation = this.translation;
 		this.logger = new Logger(this.config.logger);
+		this.errorHandler = new ErrorHandler(this.config.errorHandler);
 		this.filters = new Filters(this.config.filters);
 		this.routers = new Routers(this.config.router);
+		this.validators = new Validators(this.config.validators);
+		this.components = new Components(this.config.components);
 	}
 
 	validateConfig(config){
@@ -85,13 +109,15 @@ class Application {
 		ctx.request = new Request(request, this.config.request);
 		ctx.response = new Response(response, ctx.request, this.config.response);
 		ctx.components = this.components;
+		ctx.validators = this.validators;
+		ctx.filters = this.filters;
 		ctx.routers = this.routers;
 		if(ctx.request.error){
 			ctx.error = ctx.request.error;
 		}else{
-			await this.filters.run(ctx) && await this.routers.run(ctx);
+			await ctx.filters.run(ctx) && await ctx.routers.run(ctx);
 		}
-		errorHandler(ctx);
+		this.errorHandler.handleError(ctx);
 		this.handleResponse(ctx.response, this.config.response);
 	}
 

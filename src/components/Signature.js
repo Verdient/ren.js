@@ -1,6 +1,8 @@
+'use strict'
+
 const crypto = require('crypto');
-const Component = require('base/Component');
-const objectHelper = require('helpers/object');
+const Component = require('../base/Component');
+const objectHelper = require('../helpers/object');
 
 /**
  * prepareContent(Object content)

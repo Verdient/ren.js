@@ -25,6 +25,13 @@ class Components extends BaseClass {
 			}
 		}
 	}
+
+	getComponent(name){
+		if(typeof this.components[name] != 'undefined'){
+			return this.components[name];
+		}
+		return null;
+	}
 }
 
 module.exports = Components;

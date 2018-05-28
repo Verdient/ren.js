@@ -50,8 +50,8 @@ class Response extends BaseClass {
 				case 'string': case 'number':
 					this._body = {message: value};
 					break;
-				case 'object':
-					this._body = {data: value};
+				case 'object': case 'array':
+					this._body = value;
 					break;
 				default:
 					this.status = 500;
