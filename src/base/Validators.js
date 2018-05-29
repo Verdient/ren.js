@@ -1,12 +1,13 @@
 'use strict'
 
 const BaseClass = require('./BaseClass');
+const validators = require('../validator/validators');
 
 class Validators extends BaseClass {
 
 	constructor(options){
 		super();
-		this.validators = {};
+		this.validators = validators;
 		if(typeof options == 'object'){
 			this.register(options);
 		}

@@ -1,7 +1,7 @@
 'use strict'
 
 const Validator = require('./Validator');
-const UnprocessableEntityError = require('../web/Error/UnprocessableEntityError');
+const UnprocessableEntityError = require('../web/errors/UnprocessableEntityError');
 const objectHelper = require('../helpers/object');
 
 class RequiredValidator extends Validator {

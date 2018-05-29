@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const BaseClass = require('../base/BaseClass');
 const Errors = require('../base/Errors');
-const NotFoundError = require('../web/error/NotFoundError');
+const NotFoundError = require('../web/errors/NotFoundError');
 
 class Routers extends BaseClass {
 

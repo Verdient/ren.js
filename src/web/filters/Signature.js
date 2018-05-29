@@ -1,4 +1,4 @@
-const AuthenticationError = require('../error/AuthenticationError');
+const AuthenticationError = require('../errors/AuthenticationError');
 const Signature = require('components/signature');
 const objectHelper = require('helpers/object');
 const Filter = require('../Filter');

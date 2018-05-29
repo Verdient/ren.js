@@ -6,10 +6,12 @@ const objectHelper = require('../helpers/object');
 
 class ActiveQuery extends BaseClass {
 
-	constructor(options){
+	constructor(model){
 		super();
-		this._model = options.model;
-		this._tableName = options.tableName;
+		this._model = model;
+		if(this._model){
+			this._tableName = this._model.tableName();
+		}
 		this._attributes = ['*'];
 		this._where = {};
 		this._limit = false;
@@ -29,6 +31,7 @@ class ActiveQuery extends BaseClass {
 	async one(){
 		let db = this.db;
 		let sql = this.rawSql;
+		console.log(sql);
 		this.limit(1);
 		if(!db){
 			throw new Error('model db must be set');

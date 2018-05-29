@@ -1,12 +1,13 @@
 'use strict'
 
-const BaseClass = require('base/BaseClass');
+const BaseClass = require('./BaseClass');
+const components = require('../components/components');
 
 class Components extends BaseClass {
 
 	constructor(options){
 		super();
-		this.components = {};
+		this.components = components;
 		if(typeof options == 'object'){
 			this.register(options);
 		}

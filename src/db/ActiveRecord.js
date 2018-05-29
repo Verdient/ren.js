@@ -1,12 +1,18 @@
 'use strict'
 
 const BaseModel = require('../base/BaseModel');
+const Components = require('../base/Components');
 const stringHelper = require('../helpers/string');
 const ActiveQuery = require('./ActiveQuery');
 
 class ActiveRecord extends BaseModel {
 
-	static tableName(){
+	constructor(scenario, attributes){
+		super(scenario, attributes);
+		this.extends = {};
+	}
+
+	tableName(){
 		var className = this.className();
 
 		var name = className.substr(className.lastIndexOf('.') + 1);
@@ -15,18 +21,15 @@ class ActiveRecord extends BaseModel {
 	}
 
 	get db(){
-		let db = this.options.components.getComponent('db');
+		let db = new Components().getComponent('db');
 		if(db){
 			return db.client;
 		}
 		return null;
 	}
 
-	static find(ctx){
-		return new ActiveQuery({
-			tableName: this.tableName(),
-			model: new this(ctx)
-		});
+	find(){
+		return new ActiveQuery(this);
 	}
 }
 

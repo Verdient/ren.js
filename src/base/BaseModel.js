@@ -2,43 +2,21 @@
 
 const BaseClass = require('./BaseClass');
 const Errors = require('./Errors');
+const Validators = require('../base/Validators');
 const objectHelper = require('../helpers/object');
 
 class BaseModel extends BaseClass {
 
-	constructor(options){
+	constructor(scenario, attributes){
 		super();
-		this.options = options;
-		this.validators = options.validators || {};
 		this.attributes = {};
-		this._scenario = null;
+		this.scenario = scenario || null;
 		this._scenarioRules = {};
 		this._errors = new Errors();
 
-		return new Proxy(this, {
-			get: function(model, attribute) {
-				let attributes = model.attributes;
-				if(attribute in attributes){
-					return attributes[attribute];
-				}
-				return model[attribute];
-			},
-			set: function(model, attribute, value){
-				let attributes = model.attributes;
-				if(attribute in attributes){
-					return attributes[attribute] = value;
-				}
-				return model[attribute] = value;
-			}
-		});
-	}
-
-	set scenario(value){
-		this._scenario = value;
-	}
-
-	get scenario(){
-		return this._scenario;
+		if(typeof attributes == 'object'){
+			this.load(attributes);
+		}
 	}
 
 	get scenarioRules(){
@@ -53,7 +31,7 @@ class BaseModel extends BaseClass {
 						}
 						scenarioRules[i].push(rule);
 					}else{
-						if(objectHelper.inArray(this._scenario, rule.on)){
+						if(objectHelper.inArray(this.scenario, rule.on)){
 							delete rule.on;
 							if(!scenarioRules[i]){
 								scenarioRules[i] = [];
@@ -93,12 +71,19 @@ class BaseModel extends BaseClass {
 		for(let attribute in scenarioRules){
 			let rules = scenarioRules[attribute];
 			for(var rule of rules){
-				let validator = this.validators.getValidator(rule.type, rule);
+				rule.model = this;
+				rule.attribute = attribute;
+				let validator = new Validators().getValidator(rule.type, rule);
 				if(!validator){
 					throw new Error('Unsupported validate type: ' + rule.type);
 				}else{
-					if(!await validator.validate(this.attributes[attribute])){
-						this.addError(attribute, validator.error);
+					if(validator.skipOnError !== true || !this.hasErrors()){
+						if(!await validator.validate(this.attributes[attribute])){
+							this.addError(attribute, validator.error);
+						}
+						if(validator.export){
+							this.extends[validator.export] = validator.exports;
+						}
 					}
 				}
 			}

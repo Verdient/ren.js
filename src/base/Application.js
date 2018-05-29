@@ -57,7 +57,8 @@ const defaultConfig = {
 		'uuid': '../validator/UUIDValidator',
 		'mobile': '../validator/MobileValidator',
 		'email': '../validator/EmailValidator',
-		'version': '../validator/VersionValidator'
+		'version': '../validator/VersionValidator',
+		'exist': '../validator/ExistValidator',
 	}
 }
 

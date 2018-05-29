@@ -2,7 +2,7 @@
 
 const BaseClass = require('../base/BaseClass');
 const objectHelper = require('../helpers/object');
-const UnprocessableEntityError = require('../web/Error/UnprocessableEntityError');
+const UnprocessableEntityError = require('../web/errors/UnprocessableEntityError');
 
 class Validator extends BaseClass {
 
@@ -11,6 +11,11 @@ class Validator extends BaseClass {
 		this.attribute = options.attribute || 'attribute';
 		this.required = options.required || false;
 		this.empty = options.empty || this.attribute + ' can not be blank';
+		this.skipOnError = options.skipOnError || false;
+		this.beforeValidate = options.beforeValidate || null;
+		this.afterValidate = options.afterValidate || null;
+		this.export = options.export || false;
+		this.exports = {};
 		this._error = null;
 	}
 
