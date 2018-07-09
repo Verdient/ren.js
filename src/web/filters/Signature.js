@@ -1,5 +1,5 @@
 const AuthenticationError = require('../errors/AuthenticationError');
-const Signature = require('components/signature');
+const Signature = require('components/Signature');
 const objectHelper = require('helpers/object');
 const Filter = require('../Filter');
 

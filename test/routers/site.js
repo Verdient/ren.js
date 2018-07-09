@@ -1,6 +1,6 @@
 'use strict'
 
-const Router = require('web/router');
+const Router = require('web/Router');
 
 class Site extends Router {
 
