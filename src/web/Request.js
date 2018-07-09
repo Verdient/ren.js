@@ -30,15 +30,17 @@ class Request extends BaseClass {
 		}
 		this._acceptSeries = null;
 		let contentType = this.getHeader('Content-Type');
-		if(this.parser[contentType]){
-			let parser = require(this.parser[this.getHeader('Content-Type')]);
-			try{
-				this._body = parser(this.request.body);
-			}catch(e){
-				this.error = new BadRequestError(e.message);
+		if(contentType){
+			if(this.parser[contentType]){
+				let parser = require(this.parser[this.getHeader('Content-Type')]);
+				try{
+					this._body = parser(this.request.body);
+				}catch(e){
+					this.error = new BadRequestError(e.message);
+				}
+			}else{
+				this.error = new BadRequestError('Unsupported Content-type: ' + contentType);
 			}
-		}else{
-			this.error = new BadRequestError('Unsupported Content-type: ' + contentType);
 		}
 	}
 
@@ -100,7 +102,7 @@ class Request extends BaseClass {
 
 	getHeader(name){
 		name = name.toLowerCase();
-		return this.headers[name];
+		return this.headers[name] || null;
 	}
 }
 
