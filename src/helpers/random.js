@@ -1,15 +1,17 @@
+'use strict'
+
 /**
  * number(Integer min, Integer max)
- * 生成随机码
+ * 生成随机数
  * --------------------------------
  * @param Integer min 最小值
  * @param Integer max 最大值
  * -------------------------
- * @return Integer
+ * @return {Integer}
  * @author Verdient。
  */
-var number = function(min, max) {
-	switch (arguments.length) {
+let number = function(min, max) {
+	switch(arguments.length){
 		case 1:
 			return parseInt(Math.random() * min + 1, 10);
 			break;
@@ -28,14 +30,14 @@ var number = function(min, max) {
  * ----------------------
  * @param Integer length 长度
  * --------------------------
- * @return Integer
+ * @return {Integer}
  * @author Verdient。
  */
-var string = (length) => {
+let string = (length) => {
 	length = length || 32;
-	var $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
-	var maxPos = $chars.length;
-	var string = '';
+	let $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+	let maxPos = $chars.length;
+	let string = '';
 	for(i = 0; i < length; i++){
 		string += $chars.charAt(Math.floor(Math.random() * maxPos));
 	}
@@ -43,6 +45,6 @@ var string = (length) => {
 }
 
 module.exports = {
-	number: number,
-	string: string
+	number,
+	string
 };

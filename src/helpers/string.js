@@ -1,3 +1,5 @@
+'use strict'
+
 /**
  * mask(String value[, String mask = '*'])
  * 给字符串添加掩码
@@ -8,7 +10,7 @@
  * @return {String}
  * @author Verdient。
  */
-function mask(value, mask){
+let mask = (value, mask) => {
 	mask = mask ? mask : '*';
 	var result = '';
 	if(value){
@@ -38,7 +40,7 @@ function mask(value, mask){
  * @return {String}
  * @author Verdient。
  */
-function fixedNumber(number, length, decimal){
+let fixedNumber = (number, length, decimal) => {
 	if(!number){
 		return "0";
 	}
@@ -70,7 +72,7 @@ function fixedNumber(number, length, decimal){
  * @return {String}
  * @author Verdient。
  */
-function snakeCase(value){
+let snakeCase = (value) => {
 	value = String(value);
 	value = value.split('');
 	value.forEach((element, index) => {

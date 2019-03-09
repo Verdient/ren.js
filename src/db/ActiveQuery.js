@@ -1,87 +1,234 @@
 'use strict'
 
-const mysql = require('mysql2');
-const BaseClass = require('../base/BaseClass');
+const Component = require('../base/Component');
+const Command = require('./Command');
 const objectHelper = require('../helpers/object');
+const InvalidConfigError = require('../errors/InvalidConfigError');
+const InvalidParamError = require('../errors/InvalidParamError');
 
-class ActiveQuery extends BaseClass {
-
-	constructor(model){
-		super();
-		this._model = model;
-		if(this._model){
-			this._tableName = this._model.tableName();
-		}
-		this._attributes = ['*'];
+/**
+ * ActiveQuery
+ * 动态查询
+ * -----------
+ * @author Verdient。
+ */
+class ActiveQuery extends Component
+{
+	/**
+	 * initProperty()
+	 * 初始化属性
+	 * --------------
+	 * @inheritdoc
+	 * -----------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
+	initProperty(){
+		super.initProperty();
+		this.class = null;
+		this._db = null;
+		this._select = ['*'];
+		this._tableName = null;
 		this._where = {};
 		this._limit = false;
 		this._offset = false;
 		this._groupBy = false;
 		this._orderBy = false;
+		this._raw = false;
+		return this;
 	}
 
+	/**
+	 * init()
+	 * 初始化
+	 * ------
+	 * @inheritdoc
+	 * -----------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
+	init(){
+		super.init();
+		if(!this.class){
+			throw new InvalidParamError('class must be set');
+		}
+		this._tableName = this.class.tableName();
+		this._db = this.class.getDb();
+		return this;
+	}
+
+	/**
+	 * @getter db()
+	 * 获取数据库对象
+	 * ------------
+	 * @return {Connection}
+	 * @author Verdient。
+	 */
 	get db(){
-		return this._model.db;
+		return this._db;
 	}
 
+	/**
+	 * rawSql()
+	 * 获取源SQL
+	 * ---------
+	 * @return {String}
+	 * @author Verdient。
+	 */
 	get rawSql(){
 		return this.buildSql();
 	}
 
-	async one(){
-		let db = this.db;
-		let sql = this.rawSql;
-		console.log(sql);
-		this.limit(1);
-		if(!db){
-			throw new Error('model db must be set');
-		}
-		return new Promise((resolve, revoke) => {
-			db.query(sql, (error, result) => {
-				if(error){
-					return revoke(error);
-				}
-				resolve(result[0] || null);
-			});
-		});
-	}
-
+	/**
+	 * select(Array attributes)
+	 * 选择字段
+	 * ------------------------
+	 * @param {Array} attributes 字段
+	 * ------------------------------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
 	select(attributes){
 		if(Array.isArray(attributes)){
-			attributes.forEach(attribute => {
-				if(attribute == '*'){
-					return this._attributes = ['*'];
+			if(objectHelper.inArray('*', attributes)){
+				this._select = ['*'];
+			}else{
+				this._select = attributes;
+			}
+		}
+		return this;
+	}
+
+	/**
+	 * formatWhere(Mixed condition, relation)
+	 * 格式化检索条件
+	 * --------------------------------------
+	 * @param {Mixed} condition 条件
+	 * @param {Mixed} relation 关系
+	 * -----------------------------
+	 * @return {Array}
+	 * @author Verdient。
+	 */
+	static formatWhere(condition, relation){
+		relation = relation || 'AND';
+		let where = {};
+		switch(objectHelper.type(condition)){
+			case 'object':
+				where[relation] = [];
+				for(let attribute in condition){
+					where[relation].push(['=', attribute, condition[attribute]]);
 				}
-			});
+				break;
+			case 'array':
+				let firstElement = condition[0].toUpperCase();
+				if(objectHelper.inArray(firstElement, ['AND', 'OR'])){
+					condition.splice(0, 1);
+					where[firstElement] = [];
+					condition.forEach(element => {
+						where[firstElement].push(this.formatWhere(element));
+					});
+				}else{
+					where[relation] = [];
+					where[relation].push(condition);
+				}
+				break;
 		}
-		this._attributes = attributes;
+		return where;
 	}
 
+	/**
+	 * formatWhere(Mixed condition, relation)
+	 * 格式化检索条件
+	 * --------------------------------------
+	 * @param {Mixed} condition 条件
+	 * @param {Mixed} relation 关系
+	 * -----------------------------
+	 * @return {Array}
+	 * @author Verdient。
+	 */
+	formatWhere(condition, relation){
+		return this.constructor.formatWhere(condition, relation);
+	}
+
+	/**
+	 * where(Object condition)
+	 * 筛选条件
+	 * -----------------------
+	 * @param {Array} condition 条件
+	 * -----------------------------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
 	where(condition){
-		if(typeof this._where['AND'] == 'undefined'){
-			this._where['AND'] = {};
-		}
-		for(let attribute in condition){
-			this._where['AND'][attribute] = condition[attribute];
-		}
+		this._where = this.formatWhere(condition);
+		return this;
 	}
 
-	orderBy(orderBy){
-		this._orderBy = orderBy;
+	/**
+	 * orderBy(String attribute)
+	 * 设置排序
+	 * -------------------------
+	 * @param {String} attribute 字段
+	 * ------------------------------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
+	orderBy(attribute){
+		this._orderBy = attribute;
+		return this;
 	}
 
-	groupBy(groupBy){
-		this._groupBy = groupBy;
+	/**
+	 * groupBy(String attribute)
+	 * 设置分组
+	 * -------------------------
+	 * @param {String} attribute 字段
+	 * ------------------------------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
+	groupBy(attribute){
+		this._groupBy = attribute;
+		return this;
 	}
 
+	/**
+	 * limit(Integer limit)
+	 * 设置数量限制
+	 * --------------------
+	 * @param {Integer} limit 数量
+	 * ---------------------------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
 	limit(limit){
 		this._limit = limit;
+		return this;
 	}
 
+	/**
+	 * limit(Integer offset)
+	 * 设置数量限制
+	 * ---------------------
+	 * @param {Integer} offset 偏移量
+	 * -----------------------------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
 	offset(offset){
 		this._offset = offset;
+		return this;
 	}
 
+	/**
+	 * filterWhere(Object condition)
+	 * 过滤检索条件
+	 * -----------------------------
+	 * @param {Object} condition 条件
+	 * ------------------------------
+	 * @return {String}
+	 * @author Verdient。
+	 */
 	filterWhere(condition){
 		if(typeof this._where['AND'] == 'undefined'){
 			this._where['AND'] = {};
@@ -91,108 +238,108 @@ class ActiveQuery extends BaseClass {
 				this._where['AND'][attribute] = condition[attribute];
 			}
 		}
+		return this;
 	}
 
+	/**
+	 * buildSql()
+	 * 构建SQL
+	 * ----------
+	 * @return {String}
+	 * @author Verdient。
+	 */
 	buildSql(){
-		let where = this.buildWhere(this._where);
-		if(where.length > 0){
-			where = ' WHERE ' + where;
-		}
-		return this.buildSelect() + ' FROM `' + this._tableName + '`' + where + this.buildGroupBy() + this.buildOrderBy() + this.buildLimit() + this.buildOffset() + ';';
+		return Command.buildQuery(this._tableName, this._select, this._where, this._groupBy, this._orderBy, this._limit, this._offset);
 	}
 
-	buildSelect(){
-		let attributes = this._attributes;
-		attributes.forEach((attribute, index) => {
-			if(attribute.indexOf('`') == -1){
-				attributes[index] = '`' + attribute + '`';
+	/**
+	 * raw(Boolean raw)
+	 * 返回原始数据
+	 * ----------------
+	 * @param {Boolean} raw 是否返回原始数据
+	 * -----------------------------------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
+	raw(raw){
+		if(typeof raw !== false){
+			raw = true;
+		}
+		this._raw = raw;
+		return this;
+	}
+
+	/**
+	 * one()
+	 * 查询一条记录
+	 * ----------
+	 * @return {Promise}
+	 * @author Verdient。
+	 */
+	one(){
+		return new Promise((resolve, revoke) => {
+			this.limit(1);
+			let db = this.db;
+			let sql = this.rawSql;
+			this.trace(sql, 'QUERY SQL');
+			if(!db){
+				revoke(new InvalidConfigError('model db must be set'));
+			}else{
+				setTimeout(() => {
+					db.query(sql).then(result => {
+						if(result[0] && result[0][0]){
+							let row = result[0][0];
+							if(this._raw){
+								resolve(row);
+							}else{
+								let model = new this.class();
+								model.populate(row);
+								resolve(model);
+							}
+						}else{
+							resolve(null);
+						}
+					}).catch(revoke);
+				});
 			}
 		});
-		return 'SELECT ' + attributes.join(', ');
 	}
 
-	buildWhere(where, relation){
-		relation = relation || '';
-		let result = '';
-		let params = [];
-		let n = 0;
-		let i;
-		for(i in where){
-			let type = objectHelper.type(where[i]);
-			if(type == 'object'){
-				let num = Object.keys(where[i]).length;
-				result += (relation ? ' ' + relation + ' ' : '') + (num > 1 ? '(' : '') + this.buildWhere(where[i], i) + (num > 1 ? ')' : '');
+	/**
+	 * all()
+	 * 查询所有记录
+	 * ----------
+	 * @return {Promise}
+	 * @author Verdient。
+	 */
+	all(){
+		return new Promise((resolve, revoke) => {
+			let db = this.db;
+			let sql = this.rawSql;
+			this.trace(sql, 'QUERY SQL');
+			if(!db){
+				revoke(new InvalidConfigError('model db must be set'));
 			}else{
-				let attribute = i;
-				let operator = '=';
-				let value = where[i];
-				if(type == 'array'){
-					operator = value[0];
-
-					if(objectHelper.inArray(operator, ['=', '>', '<', '>=', '<='])){
-						value = value[1];
-					}
-				}
-				if(attribute.indexOf('`') == -1){
-					attribute = '`' + attribute + '`';
-				}
-				result += (n > 0 ? ' ' + relation + ' ' : '') + attribute + operator + '?';
-				params.push(value);
+				setTimeout(() => {
+					db.query(sql, (error, result) => {
+						if(error){
+							return revoke(error);
+						}
+						if(this._raw){
+							resolve(result);
+						}else{
+							let models = [];
+							result.forEach(row => {
+								let model = new this.class();
+								model.populate(row);
+								models.push(model);
+							});
+							resolve(models);
+						}
+					});
+				});
 			}
-			n++;
-		}
-		return mysql.format(result, params);
-	}
-
-	buildGroupBy(){
-		let groupBy = this._groupBy;
-		if(groupBy){
-			return mysql.format(' GROUP BY ?', groupBy);
-		}
-		return '';
-	}
-
-	buildOrderBy(){
-		let orderBy = this._orderBy;
-		let result = '';
-		let temp = [];
-		if(orderBy && Array.isArray(orderBy) && orderBy.length > 0){
-			result = ' ORDER BY ';
-			orderBy.forEach(value => {
-				if(Array.isArray(value)){
-					if(value[0].indexOf('`') == -1){
-						value[0] = '`' + value[0] + '`';
-					}
-					if(value[1]){
-						value[1] = value[1].toUpperCase();
-					}
-				}else if(typeof value == 'string'){
-					if(value.indexOf('`') == -1){
-						value = '`' + value + '`';
-					}
-				}
-				temp.push(Array.isArray(value) ? value.join(' ') : value);
-			});
-			result += temp.join(', ');
-		}
-		return result;
-	}
-
-	buildLimit(){
-		let limit = this._limit;
-		if(limit){
-			return mysql.format(' LIMIT ?', limit);
-		}
-		return '';
-	}
-
-	buildOffset(){
-		let limit = this._limit;
-		let offset = this._offset;
-		if(limit && offset){
-			return mysql.format(' OFFSET ?', offset);
-		}
-		return '';
+		});
 	}
 }
 

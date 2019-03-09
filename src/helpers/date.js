@@ -1,3 +1,5 @@
+'use strict'
+
 /**
  * time2str(String format[, Integer / String timestamp = false])
  * 时间戳转字符串
@@ -5,10 +7,10 @@
  * @param String format 格式
  * @patam Integer / String timestamp 时间戳
  * ---------------------------------------
- * @return String
+ * @return {String}
  * @author Verdient。
  */
-var time2str = function(format, timestamp) {
+let time2str = function(format, timestamp) {
 	var dateObject = timestamp ? new Date((!isNaN(timestamp) && String(timestamp).length < 12) ? (timestamp * 1000) : timestamp) : new Date;
 	var date = {
 		"M+": dateObject.getMonth() + 1,
@@ -37,10 +39,10 @@ var time2str = function(format, timestamp) {
  * @param String string 格式
  * @patam String type 类型
  * -------------------------
- * @return Integer
+ * @return {Integer}
  * @author Verdient。
  */
-var str2time = function(string, type) {
+let str2time = function(string, type) {
 	type = type ? type: 's';
 	string = string.replace(/-/g, '/');
 	var timestamp = Date.parse(new Date(string));
@@ -58,6 +60,6 @@ var str2time = function(string, type) {
 }
 
 module.exports = {
-	time2str: time2str,
-	str2time: str2time
+	time2str,
+	str2time
 };

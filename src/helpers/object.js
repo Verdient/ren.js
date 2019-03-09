@@ -24,11 +24,11 @@ const core_hasOwn = class2type.hasOwnProperty;
  * ---------------
  * @param Mixed obj 对象
  * ---------------------
- * @return String
+ * @return {String}
  * @mirror jQuery
  * @author Verdient。
  */
-var type = function(data){
+let type = function(data){
 	if(data == null){
 		return String(data);
 	}
@@ -41,11 +41,11 @@ var type = function(data){
  * ------------------------
  * @param Mixed obj 对象
  * ---------------------
- * @return Boolean
+ * @return {Boolean}
  * @mirror jQuery
  * @author Verdient。
  */
-var isPlainObject = function(obj){
+let isPlainObject = function(obj){
 	if(!obj || type(obj) !== "object" || obj.nodeType){
 		return false;
 	}
@@ -58,7 +58,7 @@ var isPlainObject = function(obj){
 	}catch(e){
 		return false;
 	}
-	var key;
+	let key;
 	for(key in obj){}
 	return key === undefined || core_hasOwn.call( obj, key );
 }
@@ -69,12 +69,12 @@ var isPlainObject = function(obj){
  * ------------------------
  * @param Mixed obj 对象
  * ---------------------
- * @return Boolean
+ * @return {Boolean}
  * @mirror jQuery
  * @author Verdient。
  */
-var isEmptyObject = function(obj) {
-	var name;
+let isEmptyObject = function(obj) {
+	let name;
 	for(name in obj){
 		return false;
 	}
@@ -85,19 +85,19 @@ var isEmptyObject = function(obj) {
  * merge()
  * 合并对象
  * --------
- * @return Object
+ * @return {Object}
  * @mirror jQuery
  * @author Verdient。
  */
-var merge = function(){
-	var options, name, src, copy, copyIsArray, clone,
+let merge = function(){
+	let options, name, src, copy, copyIsArray, clone,
 		target = arguments[0] || {},
 		length = arguments.length;
 
 	if(length < 2){
 		return target;
 	}
-	for(var i = 1 ; i < length; i++ ){
+	for(let i = 1 ; i < length; i++ ){
 		if((options = arguments[i]) != null){
 			for(name in options){
 				src = target[name];
@@ -129,11 +129,11 @@ var merge = function(){
  * @param {Mixed} needle 搜索的值
  * @param {Array} haystack 搜索的数组
  * ---------------------------------
- * @return Boolen
+ * @return {Boolean}
  * @author Verdient。
  */
-var inArray = (needle, haystack) => {
-	for(var i in haystack){
+let inArray = (needle, haystack) => {
+	for(let i in haystack){
 		if(haystack[i] == needle){
 			return true;
 		}
@@ -150,8 +150,8 @@ var inArray = (needle, haystack) => {
  * @return {Object}
  * @author Verdient。
  */
-var ksort = (data, compareFunction) => {
-	var keys = Object.keys(data).sort(compareFunction);　　
+let ksort = (data, compareFunction) => {
+	let keys = Object.keys(data).sort(compareFunction);　　
 	let result = {};
 	keys.forEach((key) => {
 		result[key] = data[key];
@@ -160,10 +160,10 @@ var ksort = (data, compareFunction) => {
 }
 
 module.exports = {
-	type: type,
-	isPlainObject: isPlainObject,
-	isEmptyObject: isEmptyObject,
-	merge: merge,
-	inArray: inArray,
-	ksort: ksort
+	type,
+	isPlainObject,
+	isEmptyObject,
+	merge,
+	inArray,
+	ksort
 }

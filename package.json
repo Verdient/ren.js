@@ -6,16 +6,23 @@
 		"server": "node ./bin/www"
 	},
 	"dependencies": {
-		"module-alias": "^2.0.6",
+		"async": "^2.6.1",
+		"cli-color": "^1.4.0",
+		"form-data": "^2.3.3",
+		"module-alias": "^2.1.0",
+		"moment": "^2.23.0",
+		"mysql2": "^1.6.4",
 		"redis": "^2.8.0",
-		"xmlbuilder": "^10.0.0"
+		"request": "^2.88.0",
+		"xmlbuilder": "^10.1.1"
 	},
 	"_moduleAliases": {
 		"@components": "test/components",
 		"@models": "test/models",
 		"@scripts": "test/scripts",
 		"@filters": "test/filters",
-		"@console": "test/console"
+		"@console": "test/console",
+		"@config": "test/config"
 	},
 	"_moduleDirectories": [
 		"src"

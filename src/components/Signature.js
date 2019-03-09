@@ -10,7 +10,7 @@ const objectHelper = require('../helpers/object');
  * ------------------------------
  * @param {Object} content 消息体
  * -----------------------------
- * @return Object
+ * @return {Object}
  * @author Verdient。
  */
 var prepareContent = function(content){
@@ -24,7 +24,7 @@ var prepareContent = function(content){
  * -----------------------------------
  * @param {Object} content 消息体
  * -----------------------------
- * @return String
+ * @return {String}
  * @author Verdient。
  */
 var calculateContentMd5 = (content) => {
@@ -42,27 +42,62 @@ var calculateContentMd5 = (content) => {
  * ------------------------------------
  * @param {Object} content 消息体
  * -----------------------------
- * @return String
+ * @return {String}
  * @author Verdient。
  */
 var buildSignatureString = (content, signatureMethod, key) => {
 	var contentMd5 = calculateContentMd5(content);
-	return (contentMd5 || '' ) + (signatureMethod || '') + key;
+	return (contentMd5 || '') + (signatureMethod || '') + key;
 }
 
-class Signature extends Component {
+/**
+ * Signature
+ * 签名
+ * ---------
+ * @author Verdient。
+ */
+class Signature extends Component
+{
+	/**
+	 * initProperty()
+	 * 初始化属性
+	 * --------------
+	 * @inheritdoc
+	 * -----------
+	 * @return {Self}
+	 * @author Verdient。
+	 */
+	initProperty(){
+		super.initProperty();
 
-	constructor(options){
-		super();
-		this.key = options.key || '';
+		/**
+		 * @var key
+		 * 签名秘钥
+		 * --------
+		 * @author Verdient。
+		 */
+		this.key = '';
+
+		return this;
 	}
 
+	/**
+	 * signature(Object content, String signatureMethod)
+	 * 签名
+	 * -------------------------------------------------
+	 * @param {Object} content 消息体
+	 * @param {String} signatureMethod 签名方法
+	 * ---------------------------------------
+	 * @return {String/False}
+	 * @author Verdient。
+	 */
 	signature(content, signatureMethod){
 		try{
 			var signatureString = buildSignatureString(content, signatureMethod, this.key);
 			var hash = crypto.createHmac(signatureMethod, this.key);
 			var md5 = crypto.createHash('md5');
-			return md5.update(hash.update(signatureString).digest('hex').toLocaleLowerCase()).digest('hex').toLocaleLowerCase();
+			let hashString = hash.update(signatureString).digest('hex').toLocaleLowerCase();
+			return md5.update(hashString).digest('hex').toLocaleLowerCase();
 		}catch(e){
 			return false;
 		}
