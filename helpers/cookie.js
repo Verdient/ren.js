@@ -10,20 +10,20 @@
  * @author Verdient。
  */
 let parseCookie = (cookie) => {
-	let result = {
-		httpOnly: false
-	};
+	let result = {};
 	cookie = cookie.split('; ');
 	let keyValue = cookie[0].split('=');
 	delete cookie[0];
 	result.key = keyValue[0];
 	result.value = keyValue[1];
+	let name;
 	cookie.forEach(element => {
-		if(element.toLocaleLowerCase() === 'httponly'){
-			result.httpOnly = true;
+		element = element.split('=');
+		name = element[0].toLocaleLowerCase();
+		if(element.length === 2){
+			result[name] = element[1];
 		}else{
-			element = element.split('=');
-			result[element[0].toLocaleLowerCase()] = element[1];
+			result[name] = true;
 		}
 	});
 	return result;

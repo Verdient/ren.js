@@ -1,6 +1,8 @@
 'use strict';
 
 const http = require('http');
+const https = require('https');
+const fs = require('fs');
 const Component = require('../base/Component');
 const Components = require('../base/Components');
 const coreConfig = require('../base/config');
@@ -17,11 +19,18 @@ const Validators = require('../base/Validators');
  * @author Verdient。
  */
 const defaultConfig = {
-	web: {
+	http: {
 		host: '127.0.0.1',
-		port: 80
+		port: 80,
+		timeout: 60000
 	},
-	timeout: 60000,
+	https: {
+		host: '127.0.0.1',
+		port: 443,
+		key: null,
+		cert: null,
+		timeout: 60000,
+	},
 	errorHandler: {
 		module: '../../web/handler/ErrorHandler',
 		multiErrors: false
@@ -157,9 +166,18 @@ class Application extends Component
 	 */
 	run(){
 		this.listen({
-			host: this.config.web.host,
-			port: this.config.web.port,
-			timeout: this.config.web.timeout
+			http: {
+				host: this.config.http.host,
+				port: this.config.http.port,
+				timeout: this.config.http.timeout
+			},
+			https: {
+				host: this.config.https.host,
+				port: this.config.https.port,
+				key: this.config.https.key,
+				cert: this.config.https.cert,
+				timeout: this.config.https.timeout
+			}
 		});
 	}
 
@@ -172,8 +190,12 @@ class Application extends Component
 	 * @author Verdient。
 	 */
 	validateConfig(config){
-		let web = config.web;
-		if(isNaN(web.port) || web.port < 0 || web.port > 65535){
+		let http = config.http;
+		if(isNaN(http.port) || http.port < 0 || http.port > 65535){
+			throw new Error('Application listen port must be an effective port number');
+		}
+		let https = config.https;
+		if(isNaN(https.port) || https.port < 0 || https.port > 65535){
 			throw new Error('Application listen port must be an effective port number');
 		}
 	}
@@ -187,7 +209,20 @@ class Application extends Component
 	 * @author Verdient。
 	 */
 	listen(options){
-		const server = http.createServer();
+		this.listenHttp(options.http);
+		this.listenHttps(options.https);
+	}
+
+	/**
+	 * listenHttp(Object options)
+	 * 监听HTTP
+	 * --------------------------
+	 * @param {Object} options 参数
+	 * ----------------------------
+	 * @author Verdient。
+	 */
+	listenHttp(options){
+		let server = http.createServer();
 		server.on('request', (request, response) => {
 			this.handleRequest(request, response);
 			this.trigger(this.EVENT_REQUEST, request, response);
@@ -200,6 +235,35 @@ class Application extends Component
 		server.listen(options, () => {
 			this.trigger(this.EVENT_LISTEN, options.host, options.port);
 		});
+	}
+
+	/**
+	 * listenHttps(Object options)
+	 * 监听HTTPS
+	 * ---------------------------
+	 * @param {Object} options 参数
+	 * ----------------------------
+	 * @author Verdient。
+	 */
+	listenHttps(options){
+		if(options.key && options.cert){
+			let server = https.createServer({
+				key: fs.readFileSync(options.key),
+				cert: fs.readFileSync(options.cert)
+			});
+			server.on('request', (request, response) => {
+				this.handleRequest(request, response);
+				this.trigger(this.EVENT_REQUEST, request, response);
+			});
+			server.on('error', (error) => {
+				this.trigger(this.EVENT_ERROR, error);
+			});
+			server.setTimeout(options.timeout);
+			delete options.timeout;
+			server.listen(options, () => {
+				this.trigger(this.EVENT_LISTEN, options.host, options.port);
+			});
+		}
 	}
 
 	/**

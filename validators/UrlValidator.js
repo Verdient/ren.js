@@ -71,23 +71,27 @@ class UrlValidator extends Validator
 	 */
 	validateValue(value){
 		return new Promise((resolve, revoke) => {
-			if(this.strict === true){
-				let pattern = this.pattern;
-				if(pattern.indexOf('{schemes}') != -1){
-					pattern = pattern.replace('{schemes}', this.validSchemes.join('|'));
-				}
-				pattern = new RegExp(pattern);
-				if(typeof value != 'string' || !pattern.test(value)){
-					revoke(this.message);
-				}else{
-					resolve();
-				}
+			if(typeof value !== 'string'){
+				revoke(this.message);
 			}else{
-				let urlParsed = url.parse(value);
-				if(urlParsed['protocol'] && urlParsed['host']){
-					resolve();
+				if(this.strict === true){
+					let pattern = this.pattern;
+					if(pattern.indexOf('{schemes}') != -1){
+						pattern = pattern.replace('{schemes}', this.validSchemes.join('|'));
+					}
+					pattern = new RegExp(pattern);
+					if(typeof value != 'string' || !pattern.test(value)){
+						revoke(this.message);
+					}else{
+						resolve();
+					}
 				}else{
-					revoke(this.message);
+					let urlParsed = url.parse(value);
+					if(urlParsed['protocol'] && urlParsed['host']){
+						resolve();
+					}else{
+						revoke(this.message);
+					}
 				}
 			}
 		});

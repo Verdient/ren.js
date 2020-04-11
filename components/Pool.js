@@ -74,7 +74,7 @@ class Pool extends Component
 		let removeExpired = () => {
 			this.redis.keys(this.prefix + '*', (error, members) => {
 				if(error){
-					this.logger.error(error);
+					this.error(error);
 					setTimeout(() => {
 						removeExpired();
 					}, this.removeExpiredInterval);
@@ -86,7 +86,7 @@ class Pool extends Component
 							removeExpired();
 						}, this.removeExpiredInterval);
 					}).catch(error => {
-						this.logger.error(error);
+						this.error(error);
 						setTimeout(() => {
 							removeExpired();
 						}, this.removeExpiredInterval);

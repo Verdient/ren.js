@@ -106,10 +106,10 @@ class CUrl extends Component
 				this._normalizeOptions(options).then(options => {
 					Request(options, (error, response) => {
 						if(error){
-							this.logger.warning({options, error}, 'CUrl');
+							this.warning({options, error}, 'CUrl');
 							revoke(error);
 						}else{
-							this.logger.trace({options, response: {
+							this.trace({options, response: {
 								headers: response.headers,
 								body: response.body
 							}}, 'CUrl');
@@ -121,7 +121,7 @@ class CUrl extends Component
 							resolve(response);
 						}
 					}).on('error', error => {
-						this.logger.warning({options, error}, 'CUrl');
+						this.warning({options, error}, 'CUrl');
 						revoke(error);
 					});
 				}).catch(revoke);

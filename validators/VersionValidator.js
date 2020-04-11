@@ -62,7 +62,7 @@ class VersionValidator extends Validator
 	 */
 	validateValue(value){
 		return new Promise((resolve, revoke) => {
-			if(typeof value != 'string' || value.split(this.separator).length != this.length){
+			if(typeof value !== 'string' || value.split(this.separator).length != this.length){
 				revoke(this.message);
 			}else{
 				resolve();

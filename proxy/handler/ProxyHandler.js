@@ -107,7 +107,14 @@ class ProxyHandler extends Component
 		if(this.isTunnelingProxy(request) && this.proxys.tunneling){
 			this.proxys.tunneling.proxy(request, handle, head);
 		}else if(this.isHttpProxy(request) && this.proxys.http){
-			this.proxys.http.proxy(request, handle);
+			let body = [];
+			request.on('data', (buffer) => {
+				body.push(buffer);
+			});
+			request.on('end', () => {
+				request.body = Buffer.concat(body).toString();
+				this.proxys.http.proxy(request, handle);
+			});
 		}else{
 			handle.end();
 		}

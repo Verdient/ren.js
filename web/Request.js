@@ -202,7 +202,7 @@ class Request extends Class
 		if(this._query === null){
 			this._query = {};
 			if(this.urlParsed.query){
-				let query = decodeURI();
+				let query = decodeURI(this.urlParsed.query);
 				query = query.split('&');
 				query.forEach(value => {
 					var tmp = value.split('=');
