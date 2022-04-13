@@ -11,7 +11,7 @@
 	"author": "Verdient.",
 	"license": "ISC",
 	"dependencies": {
-		"async": "^2.6.1",
+		"async": "^3.2.2",
 		"cli-color": "^1.4.0",
 		"form-data": "^2.3.3",
 		"moment": "^2.23.0",
